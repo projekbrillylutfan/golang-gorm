@@ -88,3 +88,20 @@ func TestScanRow(t *testing.T) {
 
 	assert.Equal(t, 4, len(samples))
 }
+
+func TestCreateUser(t *testing.T) {
+	user := User{
+		ID:       "1",
+		Password: "password",
+		Name: Name{
+			FirstName:  "John",
+			MiddleName: "Doe",
+			LastName:   "ireng",
+		},
+		Information: "information",
+	}
+
+	response := db.Create(&user)
+	assert.Nil(t, response.Error)
+	assert.Equal(t, 1, int(response.RowsAffected))
+}
