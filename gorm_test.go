@@ -1,6 +1,7 @@
 package belajar_golang_gorm
 
 import (
+	"fmt"
 	"strconv"
 	"testing"
 
@@ -334,7 +335,7 @@ func TestSelectFields(t *testing.T) {
 func TestStructCondition(t *testing.T) {
 	userCondition := User{
 		Name: Name{
-			FirstName:  "John",
+			FirstName: "John",
 		},
 	}
 
@@ -361,4 +362,96 @@ func TestOrderLimitOffset(t *testing.T) {
 	assert.Nil(t, result.Error)
 	assert.Equal(t, 5, len(users))
 	assert.Equal(t, "14", users[0].ID)
+}
+
+type UserResponse struct {
+	ID        string
+	FirstName string
+	LastName  string
+}
+
+func TestQueryNonModel(t *testing.T) {
+	var users []UserResponse
+
+	result := db.Model(&User{}).Select("id, first_name, last_name").Find(&users)
+	assert.Nil(t, result.Error)
+	assert.Equal(t, 14, len(users))
+	fmt.Println(users)
+}
+
+func TestUpdate(t *testing.T) {
+	user := User{}
+
+	result := db.First(&user, "id = ?", "1")
+	assert.Nil(t, result.Error)
+
+	user.Name.FirstName = "Joko"
+	user.Name.MiddleName = "Ayam"
+	user.Name.LastName = "Goreng"
+	user.Password = "123"
+	result = db.Save(&user)
+	assert.Nil(t, result.Error)
+}
+
+func TestSelectedColumns(t *testing.T) {
+	result := db.Model(&User{}).Where("id = ?", "1").Updates(map[string]interface{}{
+		"middle_name": "",
+		"last_name":   "Morro",
+	})
+	assert.Nil(t, result.Error)
+
+	result = db.Model(&User{}).Where("id = ?", "1").Update("password", "000")
+	assert.Nil(t, result.Error)
+
+	result = db.Where("id = ?", "1").Updates(User{
+		Name: Name{
+			FirstName: "Eko",
+			LastName:  "kanedi",
+		},
+	})
+
+	assert.Nil(t, result.Error)
+}
+
+func TestAutoIncrement(t *testing.T) {
+	for i := 0; i < 10; i++ {
+		userLog := UserLog{
+			UserID: "1",
+			Action: "Test Action",
+		}
+		result := db.Create(&userLog)
+		assert.Nil(t, result.Error)
+
+		assert.NotEqual(t, 0, userLog.ID)
+		fmt.Println(userLog.ID)
+	}
+}
+
+func TestSaveOrUpdate(t *testing.T) {
+	userLog := UserLog{
+		UserID: "1",
+		Action: "Test Action",
+	}
+
+	result:= db.Save(&userLog) // create
+	assert.Nil(t, result.Error)
+
+	userLog.UserID = "2"
+	result = db.Save(&userLog) // update
+	assert.Nil(t, result.Error)
+}
+
+func TestSaveOrUpdateNonAutoIncrement(t *testing.T) {
+	user:= User{
+		ID: "99",
+		Name: Name{
+			FirstName: "User 99",
+		},
+	}
+	result := db.Save(&user) // create
+	assert.Nil(t, result.Error)
+
+	user.Name.FirstName = "User 99 Updated"
+	result = db.Save(&user) // update
+	assert.Nil(t, result.Error)
 }
