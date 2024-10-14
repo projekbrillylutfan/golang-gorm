@@ -105,3 +105,8 @@ func TestCreateUser(t *testing.T) {
 	assert.Nil(t, response.Error)
 	assert.Equal(t, 1, int(response.RowsAffected))
 }
+
+func TestBatchInsert(t *testing.T) {
+	var users = []User
+	
+}
