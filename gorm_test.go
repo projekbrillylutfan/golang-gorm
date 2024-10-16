@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
 )
 
@@ -433,7 +434,7 @@ func TestSaveOrUpdate(t *testing.T) {
 		Action: "Test Action",
 	}
 
-	result:= db.Save(&userLog) // create
+	result := db.Save(&userLog) // create
 	assert.Nil(t, result.Error)
 
 	userLog.UserID = "2"
@@ -442,7 +443,7 @@ func TestSaveOrUpdate(t *testing.T) {
 }
 
 func TestSaveOrUpdateNonAutoIncrement(t *testing.T) {
-	user:= User{
+	user := User{
 		ID: "99",
 		Name: Name{
 			FirstName: "User 99",
@@ -454,4 +455,50 @@ func TestSaveOrUpdateNonAutoIncrement(t *testing.T) {
 	user.Name.FirstName = "User 99 Updated"
 	result = db.Save(&user) // update
 	assert.Nil(t, result.Error)
+}
+
+func TestConflict(t *testing.T) {
+	user := User{
+		ID: "88",
+		Name: Name{
+			FirstName: "User 88",
+		},
+	}
+	result := db.Clauses(clause.OnConflict{
+		UpdateAll: true,
+	}).Create(&user) // create
+	assert.Nil(t, result.Error)
+}
+
+func TestDelete(t *testing.T) {
+	var user User
+	result := db.First(&user, "id = ?", "88")
+	assert.Nil(t, result.Error)
+	result = db.Delete(&user)
+	assert.Nil(t, result.Error)
+
+	result = db.Delete(&User{}, "id = ?", "99")
+	assert.Nil(t, result.Error)
+
+	result = db.Where("id = ?", "77").Delete(&User{})
+	assert.Nil(t, result.Error)
+}
+
+func TestSoftDelete(t *testing.T) {
+	todo := Todo{
+		UserID: "1",
+		Title:  "Todo 1",
+		Description: "Isi todo 1",
+	}
+	result:= db.Create(&todo)
+	assert.Nil(t, result.Error)
+
+	result = db.Delete(&todo)
+	assert.Nil(t, result.Error)
+	assert.NotNil(t, todo.DeletedAt)
+
+	var todos []Todo
+	result = db.Find(&todos)
+	assert.Nil(t, result.Error)
+	assert.Equal(t, 0, len(todos))
 }
