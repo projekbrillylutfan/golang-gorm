@@ -551,3 +551,173 @@ func TestRetrieveRelation(t *testing.T) {
 	assert.Equal(t, "1", user.ID)
 	assert.Equal(t, "1", user.Wallet.ID)
 }
+
+func TestRetrieveRelationJoin(t *testing.T) {
+	var users []User
+	err := db.Model(&User{}).Joins("Wallet").Find(&users).Error
+	assert.Nil(t, err)
+
+	assert.Equal(t, 14, len(users))
+	fmt.Println(users)
+}
+
+func TestAutoCreateUpdate(t *testing.T) {
+	user:= User{
+		ID: "20",
+		Password: "password",
+		Name: Name{
+			FirstName:  "User 20",
+		},
+		Wallet: Wallet{
+			ID: "20",
+			UserID: "20",
+			Balance: 1000000,
+		},
+	}
+	err := db.Create(&user).Error
+	assert.Nil(t, err)
+}
+
+func TestSkipAutoCreateUpdate(t *testing.T) {
+	user:= User{
+		ID: "21",
+		Password: "password",
+		Name: Name{
+			FirstName:  "User 21",
+		},
+		Wallet: Wallet{
+			ID: "21",
+			UserID: "21",
+			Balance: 1000000,
+		},
+	}
+	err := db.Omit(clause.Associations).Create(&user).Error
+	assert.Nil(t, err)
+}
+
+func TestUserAndAddresses(t *testing.T) {
+	user := User {
+		ID: "2",
+		Password: "password",
+		Name: Name{
+			FirstName:  "User 2",
+		},
+		Wallet: Wallet{
+			ID: "2",
+			UserID: "2",
+			Balance: 1000000,
+		},
+		Addresses: []Address{
+			{
+				UserID: "2",
+				Address: "Jl. Raya No. 2",
+			},
+			{
+				UserID: "2",
+				Address: "Jl. Raya No. 51",
+			},
+		},
+	}
+
+	err := db.Save(&user).Error
+	assert.Nil(t, err)
+}
+
+func TestPreloadJoinOneToMany(t *testing.T) {
+	var userPreload []User
+	err:= db.Model(&User{}).Preload("Addresses").Joins("Wallet").Find(&userPreload).Error
+	assert.Nil(t, err)
+	fmt.Println(userPreload)
+}
+
+func TestTakePreloadJoinOneToMany(t *testing.T) {
+	var user User
+	err:= db.Model(&User{}).Preload("Addresses").Joins("Wallet").Take(&user, "users.id = ?", "50").Error
+	assert.Nil(t, err)
+	fmt.Println(user)
+}
+
+func TestBelongsTo(t *testing.T) {
+	fmt.Println("preload")
+	var addresses []Address
+	err:= db.Preload("User").Find(&addresses).Error
+	assert.Nil(t, err)
+
+	fmt.Println("joins")
+	addresses = []Address{}
+	err = db.Joins("User").Find(&addresses).Error
+	assert.Nil(t, err)
+}
+
+func TestBelongsToOneToOne(t *testing.T) {
+	fmt.Println("preload")
+	var wallets []Wallet
+	err:= db.Model(&Wallet{}).Preload("User").Find(&wallets).Error
+	assert.Nil(t, err)
+
+	fmt.Println("joins")
+	wallets = []Wallet{}
+	err = db.Model(&Wallet{}).Joins("User").Find(&wallets).Error
+	assert.Nil(t, err)
+}
+
+func TestCreateManyToMany(t *testing.T) {
+	product := Product{
+		ID: "P002",
+		Name: "Product 2",
+		Price: 100000,
+	}
+	err:= db.Create(&product).Error
+	assert.Nil(t, err)
+
+	err = db.Table("user_like_products").Create(map[string]interface{}{
+		"user_id": "1",
+		"product_id": "P002",
+	}).Error
+	assert.Nil(t, err)
+
+	err = db.Table("user_like_products").Create(map[string]interface{}{
+		"user_id": "2",
+		"product_id": "P002",
+	}).Error
+	assert.Nil(t, err)
+}
+
+func TestPreloadManyToMany(t *testing.T) {
+	var product Product
+	err:= db.Preload("LikedByUsers").First(&product, "id = ?", "P002").Error
+	assert.Nil(t, err)
+	assert.Equal(t, 2, len(product.LikedByUsers))
+	fmt.Println(product)
+}
+
+func TestPreloadManyToManyUser(t *testing.T) {
+	var user User
+	err:= db.Preload("LikedProducts").Take(&user, "id = ?", "1").Error
+	assert.Nil(t, err)
+	assert.Equal(t, 2, len(user.LikedProducts))
+}
+
+func TestAssociationFind(t *testing.T) {
+	var product Product
+	err:= db.First(&product, "id = ?", "P002").Error
+	assert.Nil(t, err)
+
+	var users []User
+	err = db.Model(&product).Where("users.first_name LIKE ?", "J%").Association("LikedByUsers").Find(&users)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(users))
+}
+
+func TestAssociationAdd(t *testing.T) {
+	var user User
+	err:= db.First(&user, "id = ?", "3").Error
+	assert.Nil(t, err)
+
+	var product Product
+	err = db.First(&product, "id = ?", "P002").Error
+	assert.Nil(t, err)
+
+	err = db.Model(&product).Association("LikedByUsers").Append(&user)
+	assert.Nil(t, err)
+}
