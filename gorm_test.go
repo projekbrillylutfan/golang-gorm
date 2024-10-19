@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/mysql"
@@ -21,6 +22,17 @@ func OpenConnection() *gorm.DB {
 	if err != nil {
 		panic(err)
 	}
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		panic(err)
+	}
+
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetConnMaxLifetime(30 * time.Minute)
+	sqlDB.SetConnMaxIdleTime(5 * time.Minute)
+
 	return db
 }
 
@@ -849,3 +861,40 @@ func TestContext(t *testing.T) {
 	assert.Equal(t, 17, len(users))
 }
 
+func BrokenWalletBalance(db *gorm.DB) *gorm.DB{
+	return db.Where("balance = ?", 0)
+}
+
+func SulatanWalletBalance(db *gorm.DB) *gorm.DB{
+	return db.Where("balance > ?", 100000)
+}
+
+func TestScopes(t *testing.T) {
+	var wallets []Wallet
+	err:= db.Scopes(BrokenWalletBalance).Find(&wallets).Error
+	assert.Nil(t, err)
+
+	wallets = []Wallet{}
+	err = db.Scopes(SulatanWalletBalance).Find(&wallets).Error
+	assert.Nil(t, err)
+}
+
+func TestMigrator(t *testing.T) {
+	err := db.Migrator().AutoMigrate(&GuestBook{})
+	assert.Nil(t, err)
+}
+
+func TestHook(t *testing.T) {
+	user := User{
+		Password: "rahasia",
+		Name: Name{
+			FirstName: "User 100",
+		},
+	}
+
+	err := db.Create(&user).Error
+	assert.Nil(t, err)
+	assert.NotEqual(t, "", user.ID)
+
+	fmt.Println(user.ID)
+}
