@@ -6,6 +6,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// user.go
+
 type User struct {
 	ID           string    `gorm:"primary_key;column:id;<-:create"`
 	Password     string    `gorm:"column:password"`

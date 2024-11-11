@@ -115,7 +115,7 @@ func TestScanRow(t *testing.T) {
 
 func TestCreateUser(t *testing.T) {
 	user := User{
-		ID:       "1",
+		ID:       "80",
 		Password: "password",
 		Name: Name{
 			FirstName:  "John",
@@ -128,6 +128,7 @@ func TestCreateUser(t *testing.T) {
 	response := db.Create(&user)
 	assert.Nil(t, response.Error)
 	assert.Equal(t, 1, int(response.RowsAffected))
+	fmt.Println(response)
 }
 
 func TestBatchInsert(t *testing.T) {
