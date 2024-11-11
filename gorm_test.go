@@ -380,8 +380,8 @@ func TestMapCondition(t *testing.T) {
 
 func TestOrderLimitOffset(t *testing.T) {
 	var users []User
-	result := db.Order("id asc, first_name asc").Limit(5).Offset(5).Find(&users)
-	assert.Nil(t, result.Error)
+	result := db.Order("id asc, first_name asc").Limit(5).Offset(5).Find(&users).Error
+	assert.Nil(t, result)
 	assert.Equal(t, 5, len(users))
 	assert.Equal(t, "14", users[0].ID)
 }
@@ -401,6 +401,8 @@ func TestQueryNonModel(t *testing.T) {
 	fmt.Println(users)
 }
 
+
+// update di gorm
 func TestUpdate(t *testing.T) {
 	user := User{}
 
@@ -415,6 +417,8 @@ func TestUpdate(t *testing.T) {
 	assert.Nil(t, result.Error)
 }
 
+
+// ini patch
 func TestSelectedColumns(t *testing.T) {
 	result := db.Model(&User{}).Where("id = ?", "1").Updates(map[string]interface{}{
 		"middle_name": "",
