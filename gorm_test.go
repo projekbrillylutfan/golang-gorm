@@ -1,5 +1,7 @@
 package belajar_golang_gorm
 
+//belajar lagi golang gorm
+
 import (
 	"context"
 	"fmt"
