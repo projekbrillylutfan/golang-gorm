@@ -20,6 +20,7 @@ import (
 func OpenConnection() *gorm.DB {
 	dialect := mysql.Open("root:admin@tcp(localhost:3306)/belajar_golang_gorm?charset=utf8mb4&parseTime=True&loc=Local")
 	db, err := gorm.Open(dialect, &gorm.Config{
+		//add logger
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
@@ -309,6 +310,7 @@ func TestQuerySingleObjectInlineCondition(t *testing.T) {
 	result := db.First(&user, "id = ?", "5")
 	assert.Nil(t, result.Error)
 	assert.Equal(t, "5", user.ID)
+	fmt.Println(user)
 }
 
 func TestQueryAllObject(t *testing.T) {
