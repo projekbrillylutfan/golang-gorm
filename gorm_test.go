@@ -16,6 +16,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+//open connection di gorm
 func OpenConnection() *gorm.DB {
 	dialect := mysql.Open("root:admin@tcp(localhost:3306)/belajar_golang_gorm?charset=utf8mb4&parseTime=True&loc=Local")
 	db, err := gorm.Open(dialect, &gorm.Config{
@@ -73,10 +74,11 @@ func TestRawSQL(t *testing.T) {
 	err = db.Raw("select id, name from sample").Scan(&samples).Error
 	assert.Nil(t, err)
 	assert.Equal(t, 4, len(samples))
+	fmt.Println(samples)
 }
 
 func TestSqlRow(t *testing.T) {
-	var samples []Sample
+	var samples []*Sample
 
 	rows, err := db.Raw("select id, name from sample").Rows()
 	assert.Nil(t, err)
@@ -89,14 +91,15 @@ func TestSqlRow(t *testing.T) {
 		err := rows.Scan(&id, &name)
 		assert.Nil(t, err)
 
-		samples = append(samples, Sample{Id: id, Name: name})
+		samples = append(samples, &Sample{Id: id, Name: name})
 	}
 
 	assert.Equal(t, 4, len(samples))
+	fmt.Println(samples)
 }
 
 func TestScanRow(t *testing.T) {
-	var samples []Sample
+	var samples []*Sample
 
 	rows, err := db.Raw("select id, name from sample").Rows()
 	assert.Nil(t, err)
