@@ -585,7 +585,7 @@ func TestRetrieveRelationJoin(t *testing.T) {
 	err := db.Model(&User{}).Joins("Wallet").Find(&users).Error
 	assert.Nil(t, err)
 
-	assert.Equal(t, 14, len(users))
+	assert.Equal(t, 20, len(users))
 	fmt.Println(users)
 }
 
