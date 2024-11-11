@@ -453,6 +453,7 @@ func TestAutoIncrement(t *testing.T) {
 	}
 }
 
+//save or update
 func TestSaveOrUpdate(t *testing.T) {
 	userLog := UserLog{
 		UserID: "1",
