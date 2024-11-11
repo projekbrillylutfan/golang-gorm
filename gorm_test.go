@@ -543,6 +543,7 @@ func TestUnscoped(t *testing.T) {
 	assert.Equal(t, 0, len(todos))
 }
 
+// locking di gorm
 func TestLock(t *testing.T) {
 	err:= db.Transaction(func (tx *gorm.DB) error {
 		var user User
@@ -576,6 +577,7 @@ func TestRetrieveRelation(t *testing.T) {
 
 	assert.Equal(t, "1", user.ID)
 	assert.Equal(t, "1", user.Wallet.ID)
+	fmt.Println(user)
 }
 
 func TestRetrieveRelationJoin(t *testing.T) {
