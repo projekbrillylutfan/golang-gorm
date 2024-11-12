@@ -589,6 +589,7 @@ func TestRetrieveRelationJoin(t *testing.T) {
 	fmt.Println(users)
 }
 
+// ini baru upsert
 func TestAutoCreateUpdate(t *testing.T) {
 	user:= User{
 		ID: "20",
@@ -623,6 +624,7 @@ func TestSkipAutoCreateUpdate(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+// one to many
 func TestUserAndAddresses(t *testing.T) {
 	user := User {
 		ID: "2",
@@ -665,6 +667,7 @@ func TestTakePreloadJoinOneToMany(t *testing.T) {
 	fmt.Println(user)
 }
 
+// many to one
 func TestBelongsTo(t *testing.T) {
 	fmt.Println("preload")
 	var addresses []Address
