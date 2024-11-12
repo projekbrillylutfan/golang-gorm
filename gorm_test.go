@@ -794,6 +794,7 @@ func TestAssociationClear(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+// mantap sekeli preload
 func TestPreloadingWithCondition(t *testing.T) {
 	var user User
 	err := db.Preload("Wallet", "balance > ?", 10000).First(&user, "id = ?", "1").Error
