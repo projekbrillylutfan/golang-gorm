@@ -879,7 +879,7 @@ func TestContext(t *testing.T) {
 	var users []User
 	err := db.WithContext(ctx).Find(&users).Error
 	assert.Nil(t, err)
-	assert.Equal(t, 17, len(users))
+	assert.Equal(t, 20, len(users))
 }
 
 func BrokenWalletBalance(db *gorm.DB) *gorm.DB{

@@ -2,6 +2,7 @@ package belajar_golang_gorm
 
 import "time"
 
+// untuk migrator gorm
 type GuestBook struct {
 	ID        int64     `gorm:"primary_key;column:id;autoIncrement"`
 	Name      string    `gorm:"column:name"`
