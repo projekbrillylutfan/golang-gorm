@@ -680,6 +680,7 @@ func TestBelongsTo(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+// one to one belongs to
 func TestBelongsToOneToOne(t *testing.T) {
 	fmt.Println("preload")
 	var wallets []Wallet
@@ -692,6 +693,7 @@ func TestBelongsToOneToOne(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+// many to many
 func TestCreateManyToMany(t *testing.T) {
 	product := Product{
 		ID: "P002",
